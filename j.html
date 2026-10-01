@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ped In Picture — você recebeu um roteiro</title>
+<style>
+body{margin:0;background:#FFF8EF;color:#3A3230;font:17px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+main{max-width:480px;margin:0 auto;padding:40px 20px 64px;text-align:center}
+h1{font-size:26px;line-height:1.25;margin:0 0 4px}
+.sub{color:#7A716D;font-size:16px;margin:0 0 28px}
+.code{font-size:34px;font-weight:700;letter-spacing:3px;background:#fff;border:2px solid #2f7f78;border-radius:16px;padding:16px 12px;margin:0 0 10px}
+.copyBtn{display:inline-block;border:none;background:none;color:#2f7f78;font-size:15px;font-weight:600;padding:6px 10px;cursor:pointer}
+ol{text-align:left;font-size:16px;padding-left:22px;margin:28px 0}
+li{margin:10px 0}
+.storeBtn{display:inline-block;margin-top:8px;background:#2f7f78;color:#fff;text-decoration:none;font-weight:700;border-radius:999px;padding:14px 28px;font-size:16px}
+.lang{font-size:14px;margin-top:36px;color:#7A716D}
+.lang a{color:#2f7f78;margin:0 6px;text-decoration:none}
+.lang a.active{font-weight:700;text-decoration:underline}
+.noCode{color:#7A716D;font-size:15px}
+</style>
+</head>
+<body>
+<main>
+  <h1 id="title">Ped In Picture</h1>
+  <p class="sub" id="subtitle">Você recebeu um roteiro visual</p>
+
+  <div id="codeBlock" style="display:none">
+    <div class="code" id="codeText"></div>
+    <button class="copyBtn" id="copyBtn" type="button">Copiar código</button>
+  </div>
+  <p class="noCode" id="noCodeMsg" style="display:none">Peça ao profissional o link ou o código completo.</p>
+
+  <ol id="steps">
+    <li>Baixe o app <b>Ped In Picture</b>.</li>
+    <li>Abra o app e toque em <b>&ldquo;Tenho um código&rdquo;</b>, na aba Storyboard.</li>
+    <li>Digite o código acima.</li>
+  </ol>
+
+  <a class="storeBtn" id="storeBtn" href="https://play.google.com/store/apps/details?id=com.pedinpicture.app">Baixar na Play Store</a>
+
+  <div class="lang" id="langSwitch">
+    <a href="?lang=pt" id="lang-pt">Português</a>·
+    <a href="?lang=en" id="lang-en">English</a>·
+    <a href="?lang=es" id="lang-es">Español</a>
+  </div>
+</main>
+<script>
+// Single-page, no server: reads ?c=<code> (the invite code) and ?lang=pt|en|es (manual override,
+// defaults to the browser's own language). Kept deliberately simple — this is the V1 "install +
+// join" landing page described in src/lib/sharing.ts's shareLandingUrl() doc comment; replace with
+// a real Universal/App Link once the app is published on both stores (see that same comment).
+(function () {
+  var params = new URLSearchParams(location.search);
+  var code = (params.get('c') || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
+  var langParam = params.get('lang');
+  var lang = langParam || (navigator.language || 'pt').slice(0, 2);
+  if (['pt', 'en', 'es'].indexOf(lang) === -1) lang = 'pt';
+
+  var T = {
+    pt: {
+      title: 'Ped In Picture', subtitle: 'Você recebeu um roteiro visual',
+      copy: 'Copiar código', copied: 'Copiado!',
+      noCode: 'Peça ao profissional o link ou o código completo.',
+      steps: ['Baixe o app <b>Ped In Picture</b>.', 'Abra o app e toque em &ldquo;Tenho um código&rdquo;, na aba Storyboard.', 'Digite o código acima.'],
+      store: 'Baixar na Play Store',
+    },
+    en: {
+      title: 'Ped In Picture', subtitle: 'You received a visual storyboard',
+      copy: 'Copy code', copied: 'Copied!',
+      noCode: 'Ask the professional for the link or the full code.',
+      steps: ['Download the <b>Ped In Picture</b> app.', 'Open the app and tap &ldquo;I have a code&rdquo;, in the Storyboard tab.', 'Enter the code above.'],
+      store: 'Get it on Google Play',
+    },
+    es: {
+      title: 'Ped In Picture', subtitle: 'Recibiste un guion visual',
+      copy: 'Copiar código', copied: '¡Copiado!',
+      noCode: 'Pide al profesional el enlace o el código completo.',
+      steps: ['Descarga la app <b>Ped In Picture</b>.', 'Abre la app y toca &ldquo;Tengo un código&rdquo;, en la pestaña Storyboard.', 'Escribe el código de arriba.'],
+      store: 'Disponible en Google Play',
+    },
+  }[lang];
+
+  document.documentElement.lang = lang === 'pt' ? 'pt-BR' : lang;
+  document.title = T.title + ' — ' + T.subtitle;
+  document.getElementById('title').textContent = T.title;
+  document.getElementById('subtitle').textContent = T.subtitle;
+  document.getElementById('steps').innerHTML = T.steps.map(function (s) { return '<li>' + s + '</li>'; }).join('');
+  document.getElementById('storeBtn').textContent = T.store;
+  document.getElementById('lang-' + lang).className = 'active';
+
+  if (code.length >= 6) {
+    document.getElementById('codeBlock').style.display = '';
+    var display = code.length === 8 ? code.slice(0, 4) + '-' + code.slice(4) : code;
+    document.getElementById('codeText').textContent = display;
+    var btn = document.getElementById('copyBtn');
+    btn.textContent = T.copy;
+    btn.addEventListener('click', function () {
+      navigator.clipboard?.writeText(code).then(function () {
+        btn.textContent = T.copied;
+        setTimeout(function () { btn.textContent = T.copy; }, 1500);
+      });
+    });
+  } else {
+    document.getElementById('noCodeMsg').style.display = '';
+    document.getElementById('noCodeMsg').textContent = T.noCode;
+  }
+})();
+</script>
+</body>
+</html>
