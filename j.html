@@ -51,8 +51,13 @@ li{margin:10px 0}
 // join" landing page described in src/lib/sharing.ts's shareLandingUrl() doc comment; replace with
 // a real Universal/App Link once the app is published on both stores (see that same comment).
 (function () {
+  // The code lives in the URL FRAGMENT (#c=...), not the query string — a fragment is never sent
+  // in the HTTP request itself, so it never reaches GitHub Pages'/its CDN's access logs (unlike a
+  // query string would). `lang` stays a normal query param since it's just a UI preference, not
+  // sensitive. src/lib/sharing.ts's shareLandingUrl() builds the link this page expects.
   var params = new URLSearchParams(location.search);
-  var code = (params.get('c') || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
+  var hashParams = new URLSearchParams(location.hash.replace(/^#/, ''));
+  var code = (hashParams.get('c') || params.get('c') || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
   var langParam = params.get('lang');
   var lang = langParam || (navigator.language || 'pt').slice(0, 2);
   if (['pt', 'en', 'es'].indexOf(lang) === -1) lang = 'pt';
